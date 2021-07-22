@@ -227,3 +227,56 @@ const viewEmployeesDept = () => {
         })
     }); 
 };
+
+
+// View total salary cost of department
+const salaryDept = () => {
+    const deptArr = [];
+    
+    // Query to get departments
+    const sqlDept = `SELECT * FROM department;`;
+    db.query(sqlDept, (err, response) => {
+        if (err) throw err;
+        response.forEach((department) => deptArr.push(department.name));
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'deptData',
+                message: "Which department would you like to see the total salary cost for?",
+                choices: deptArr
+            }
+        ])
+        .then(result => {
+            let deptID;
+            let roleArr = [];
+            
+            // Gets department id
+            response.forEach((department) => {
+                if (result.deptData === department.name) {
+                    deptID = department.id;
+                }
+            })
+
+            // Query to get roles associate with department ID
+            const sqlRole = `SELECT * FROM role WHERE department_id = ?;`;
+            db.query(sqlRole, deptID, (err, responseRole) => {
+                if (err) throw err;
+                // Loops through roles and pushes ids to array
+                responseRole.forEach((role) => roleArr.push(role.id));
+                
+                // Query to get total salary
+                const sql = `SELECT SUM(salary) AS total_salary_cost FROM role WHERE id = ? OR id = ?;`;
+                db.query(sql, roleArr, (err, result) => {
+                    if (err) throw err;
+                    console.log(``);
+                    console.log(`                     ` + 'Total Salary From Department');
+                    console.log(`========================================================`)
+                    console.table(result);
+                    console.log(`========================================================`);
+                    initialPrompt();
+                })  
+            })
+        })
+    });
+};
+
