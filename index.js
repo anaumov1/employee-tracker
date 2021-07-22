@@ -632,3 +632,75 @@ const deleteRole = () => {
         })
     });
 };
+
+// Updates employee role
+const updateRole = () => {
+    const employeeArr = [];
+    const roleArr = [];
+    let employeeID;
+    let roleID;
+
+    // Queries to get employees and roles and add to respective arrays
+    const sqlEmployee = `SELECT * FROM employee;`;
+    const sqlRole = `SELECT * FROM role;`;
+
+    // Employee query
+    db.query(sqlEmployee, (err, empData) => {
+        if (err) throw err;
+        empData.forEach((employee) => employeeArr.push(employee.first_name + ' ' + employee.last_name));
+
+        // Role query
+        db.query(sqlRole, (err, roleData) => {
+            if (err) throw err;
+            roleData.forEach((role) => roleArr.push(role.title));
+
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'employeeSelect',
+                    message: "Which employee's role would you like to update?",
+                    choices: employeeArr
+                },
+                {
+                    type: 'list',
+                    name: 'roleSelect',
+                    message: "What would you like to change the employee's role to?",
+                    choices: roleArr
+                }
+            ])
+            .then(responseData => {
+                const roleResponse = responseData.roleSelect;
+                const employeeResponse = responseData.employeeSelect;
+    
+                // Gets the first and last name from the employee response to use to find the id
+                let firstName = employeeResponse.split(' ')[0];
+                let lastName = employeeResponse.split(' ').pop();
+    
+                // Loops through employees to find ID based on the first name and last name
+                empData.forEach((employee) => {
+                    if ((firstName === employee.first_name) && (lastName === employee.last_name)) {
+                        employeeID = employee.id;
+                    }
+                })
+                
+                // Loops through roles to find matching id
+                roleData.forEach((role) => {
+                    if (roleResponse === role.title) {
+                        roleID = role.id
+                    }
+                })
+
+                // Query to update employee's role
+                const sql = `UPDATE employee SET role_id = ?
+                            WHERE id = ?`;
+                const params = [roleID, employeeID];
+
+                db.query(sql, params, (err, result) => {
+                    if (err) throw err;
+                    console.log("Employee role updated successfully!");
+                    initialPrompt();
+                })
+            })
+        })          
+    });  
+};
