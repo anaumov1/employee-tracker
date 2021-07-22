@@ -445,3 +445,30 @@ const deleteEmployee = () => {
         })
     });
 };
+
+// Adds new department
+const addDepartment = () => {
+    return inquirer.prompt([
+        {
+            type: 'input',
+            name: 'addDept',
+            message: "Please enter name of new department. (Required)", 
+            validate: deptInput => {
+                if (deptInput) {
+                    return true;
+                } else {
+                    console.log("  Please enter the new department's name.");
+                    return false;
+                }
+            }
+        },
+    ])
+    .then(response => {
+        const sql = `INSERT INTO department (name) VALUES (?)`;
+         db.query(sql, response.addDept, (err, result) => {
+             if (err) throw err;
+             console.log('New department added successfully!')
+             initialPrompt();
+         })
+    });
+};
