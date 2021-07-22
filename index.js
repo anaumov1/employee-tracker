@@ -132,3 +132,47 @@ const viewAllRoles = () => {
     });
 };
 
+
+// Views employees by manager
+const viewEmployeesMgr = () => {
+    const mgrArr = [];
+    
+    // Query to get employees
+    const sqlMgr = `SELECT * FROM employee;`;
+    db.query(sqlMgr, (err, response) => {
+        if (err) throw err;
+        response.forEach((employee) => mgrArr.push(employee.first_name + ' ' + employee.last_name));
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'mgrData',
+                message: "Which manager would you like to see the employee's under?",
+                choices: mgrArr
+            }
+        ])
+        .then(result => {
+            let firstName = (result.mgrData).split(' ')[0];
+            let lastName = (result.mgrData).split(' ').pop();
+            let mgrID;
+            
+            // Gets mgr id
+            response.forEach((employee) => {
+                if ((firstName === employee.first_name) && (lastName === employee.last_name)) {
+                    mgrID = employee.id;
+                }
+            })
+
+            // Query to view data
+            const sql = `SELECT * FROM employee WHERE manager_id = ?;`;
+            db.query(sql, mgrID, (err, result) =>{
+                if (err) throw err;
+                console.log(``);
+                console.log(`                     ` + 'Employees By Manager');
+                console.log(`========================================================`)
+                console.table(result);
+                console.log(`========================================================`);
+                initialPrompt();
+            })
+        })
+    });
+};
