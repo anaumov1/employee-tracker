@@ -402,3 +402,46 @@ const addEmployee = () => {
       });
   };
   
+
+  // Deletes an employee
+const deleteEmployee = () => {
+    const employeeArr = [];
+    let employeeID;
+
+    // Query to get employees
+    const sqlEmployee = `SELECT * FROM employee;`
+    db.query(sqlEmployee, (err, empData) => {
+        if (err) throw err;
+        // Loop to get employee name and push to array
+        empData.forEach((employee) => employeeArr.push(employee.first_name + ' ' + employee.last_name));
+
+        return inquirer.prompt([
+            {
+                type: 'list',
+                name: 'empDelete',
+                message: "Which employee would you like to delete?",
+                choices: employeeArr
+            }
+        ])
+        .then(response => {
+            // Gets the first and last name from the employee response to use to find the id
+            let firstName = (response.empDelete).split(' ')[0];
+            let lastName = (response.empDelete).split(' ').pop();
+
+            // Loops through employees to find ID based on the first name and last name
+            empData.forEach((employee) => {
+                if ((firstName === employee.first_name) && (lastName === employee.last_name)) {
+                    employeeID = employee.id;
+                }
+            })
+
+            // Query to delete employee
+            const sql = `DELETE FROM employee WHERE id = ?;`
+            db.query(sql, employeeID, (err, result) => {
+                if (err) throw err;
+                console.log("Employee deleted.")
+                initialPrompt();
+            })
+        })
+    });
+};
