@@ -26,4 +26,11 @@ VALUES
 ('Lawyer', '150000', 5),
 ('Paralegal', '40000', 5);
 
+INSERT INTO department (name)
+VALUES
+('Sales'),
+('Engineering'),
+('Human Resources'),
+('Finance'),
+('Legal');
 
