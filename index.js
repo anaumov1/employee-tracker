@@ -97,3 +97,38 @@ const viewAllEmployees = () => {
         initialPrompt();
     });
 };
+
+// Gets all department data from database
+const viewAllDepartments = () => {
+    const sql = `SELECT * FROM department;`
+
+    db.query(sql, (err, result) => {
+        if (err) throw err;
+        console.log(``);
+        console.log(``);
+        console.log(`                   ` + 'All Departments');
+        console.log(`========================================================`)
+        console.table(result);
+        console.log(`========================================================`)
+        initialPrompt();
+    });
+};
+
+
+// Gets all role data from database
+const viewAllRoles = () => {
+    const sql = `SELECT role.id, role.title, role.salary, department.name AS department
+                FROM role
+                LEFT JOIN department ON department.id = role.department_id;`
+
+    db.query(sql, (err, result) => {
+        if (err) throw err;
+        console.log(``);
+        console.log(`                     ` + 'All Roles');
+        console.log(`========================================================`)
+        console.table(result);
+        console.log(`========================================================`);
+        initialPrompt();
+    });
+};
+
