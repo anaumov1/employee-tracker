@@ -24,9 +24,9 @@ The user will need to install "inquirer" npm for programm to run. Please refer t
   ## Usage
   Run node index command or npm start command in the command line. If installed correctly the user will be prompted with a series of options. Choose the desired data view or manipulate data options such as "View All Employees" or "Add A Department".
   
-  ![alt text](assets/images/screenshot.PNG)
+  ![alt text](assets/images/Screenshot.PNG)
   
-  ![alt text](assets/images/screenshot1.PNG)
+  ![alt text](assets/images/Screenshot1.PNG)
 
 
   ## License
