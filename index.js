@@ -704,3 +704,74 @@ const updateRole = () => {
         })          
     });  
 };
+
+// Update employee's manager
+const updateManager = () => {
+    const employeeArr = [];
+    
+    // Query to get employees
+    const sqlEmployee = `SELECT * FROM employee;`;
+
+    // Employee query
+    db.query(sqlEmployee, (err, empData) => {
+        if (err) throw err;
+        empData.forEach((employee) => employeeArr.push(employee.first_name + ' ' + employee.last_name));
+        
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'employeeSelect',
+                message: "Which employee's manager would you like to update?",
+                choices: employeeArr
+            },
+        ])
+        .then(empResponse => {
+            let nameSelect = empResponse.employeeSelect;
+            const mgrArr = employeeArr.filter(employee => employee !== nameSelect)
+            
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'mgrSelect',
+                    message: "Who is the employee's new manager?",
+                    choices: mgrArr
+                }
+            ])
+            .then(response => {
+                let employeeID;
+                let mgrID;
+
+                let firstNameEmp = (empResponse.employeeSelect).split(' ')[0];
+                let lastNameEmp = (empResponse.employeeSelect).split(' ').pop();
+                let firstNameMgr = (response.mgrSelect).split(' ')[0];
+                let lastNameMgr = (response.mgrSelect).split(' ').pop();
+
+                // Gets employee's id
+                empData.forEach((employee) => {
+                    if ((firstNameEmp === employee.first_name) && (lastNameEmp === employee.last_name)) {
+                        employeeID = employee.id;
+                    }
+                })
+
+                // Gets new manager's id
+                empData.forEach((employee) => {
+                    if ((firstNameMgr === employee.first_name) && (lastNameMgr === employee.last_name)) {
+                        mgrID = employee.id;
+                    }
+                })
+
+                // Query to update manager
+                const sql = `UPDATE employee SET manager_id = ?
+                            WHERE id = ?;`;
+                const params = [mgrID, employeeID]
+                db.query(sql, params, (err, result) => {
+                    if (err) throw err;
+                    console.log("Employee manager updated!")
+                    initialPrompt()
+                })
+            })
+        })
+    });           
+};
+
+initialPrompt();
