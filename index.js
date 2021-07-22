@@ -176,3 +176,54 @@ const viewEmployeesMgr = () => {
         })
     });
 };
+
+// View employees by department
+const viewEmployeesDept = () => {
+    const deptArr = [];
+    
+    // Query to get departments
+    const sqlDept = `SELECT * FROM department;`;
+    db.query(sqlDept, (err, response) => {
+        if (err) throw err;
+        response.forEach((department) => deptArr.push(department.name));
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'deptData',
+                message: "Which department would you like to see the employee's under?",
+                choices: deptArr
+            }
+        ])
+        .then(result => {
+            const roleArr = [];
+            let deptID;
+            
+            // Gets department id
+            response.forEach((department) => {
+                if (result.deptData === department.name) {
+                    deptID = department.id;
+                }
+            })
+
+            // Query to get roles associate with department ID
+            const sqlRole = `SELECT * FROM role WHERE department_id = ?;`;
+            db.query(sqlRole, deptID, (err, responseRole) => {
+                if (err) throw err;
+                // Loops through roles and pushes ids to array
+                responseRole.forEach((role) => roleArr.push(role.id));
+
+                // Query to get employees associate with the roles and display in table
+                const sqlEmp = `SELECT * FROM employee WHERE role_id = ? OR role_id = ?;`;
+                db.query(sqlEmp, roleArr, (err, responseEmp) => {
+                    if (err) throw err;
+                    console.log(``);
+                    console.log(`                     ` + 'Employees By Department');
+                    console.log(`========================================================`)
+                    console.table(responseEmp);
+                    console.log(`========================================================`);
+                    initialPrompt();
+                })
+            })
+        })
+    }); 
+};
