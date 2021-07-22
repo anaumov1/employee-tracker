@@ -590,3 +590,45 @@ const addRole = () => {
         })
     });
 };
+
+
+// Deletes a role
+const deleteRole = () => {
+    const roleArr = [];
+    let roleID;
+
+    // Query to get roles
+    const sqlRole = `SELECT * FROM role;`;
+
+    db.query(sqlRole, (err, response) => {
+        if (err) throw err;
+        response.forEach((role) => roleArr.push(role.title))
+
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'roleSelect',
+                message: "Which role would you like to delete?",
+                choices: roleArr
+            }
+        ])
+        .then(result => {
+            const roleResponse = result.roleSelect;
+
+            // Loops through roles to find matching id
+            response.forEach((role) => {
+                if (roleResponse === role.title) {
+                    roleID = role.id
+                }
+            })
+
+            // Query to delete role
+            const sql = `DELETE FROM role WHERE id = ?;`
+            db.query(sql, roleID, (err, result) => {
+                if (err) throw err;
+                console.log("Role has been deleted")
+                initialPrompt();
+            })
+        })
+    });
+};
