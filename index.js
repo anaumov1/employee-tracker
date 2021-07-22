@@ -8,7 +8,6 @@ db.connect(err => {
     console.log('Connected to the database.');
 });
 
-
 // Initial options at start of application
 const initialPrompt = () => {
     return inquirer.prompt([
@@ -72,7 +71,6 @@ const initialPrompt = () => {
     });
 };
 
-
 // Gets all employee data from database
 const viewAllEmployees = () => {
     const sql = `SELECT employee.id, employee.first_name, employee.last_name,
@@ -114,7 +112,6 @@ const viewAllDepartments = () => {
     });
 };
 
-
 // Gets all role data from database
 const viewAllRoles = () => {
     const sql = `SELECT role.id, role.title, role.salary, department.name AS department
@@ -131,7 +128,6 @@ const viewAllRoles = () => {
         initialPrompt();
     });
 };
-
 
 // Views employees by manager
 const viewEmployeesMgr = () => {
@@ -228,7 +224,6 @@ const viewEmployeesDept = () => {
     }); 
 };
 
-
 // View total salary cost of department
 const salaryDept = () => {
     const deptArr = [];
@@ -280,130 +275,128 @@ const salaryDept = () => {
     });
 };
 
-
 // Adds new employee
 const addEmployee = () => {
-    const sqlR = `SELECT * FROM role;`;
-    const roleArr = [];
-  
-    // Gets all current roles and pushes to roleArr
-    db.query(sqlR, (err, roleData) => {
-        if (err) throw err;
-        roleData.forEach((role) => roleArr.push(role.title));
-    })
-  
-      return inquirer.prompt([
-          {
-              type: 'input',
-              name: 'addFirstName',
-              message: "Please enter new employee's first name.",
-              validate: firstNameInput => {
-                  if (firstNameInput) {
-                      if (firstNameInput.charAt(0) === firstNameInput.charAt(0).toUpperCase()) {
-                          return true;
-                      } else {
-                          console.log("  Please capitalize the first name.");
-                          return false
-                      }
-                  } else {
-                      console.log("  You must enter the first name of the new employee.")
-                      return false
-                  }
-              }
-          },
-          {
-              type: 'input',
-              name: 'addLastName',
-              message: "Please enter new employee's last name.",
-              validate: lastNameInput => {
-                  if (lastNameInput) {
-                      if (lastNameInput.charAt(0) === lastNameInput.charAt(0).toUpperCase()) {
-                          return true;
-                      } else {
-                          console.log("  Please capitalize the last name.");
-                          return false
-                      }
-                  } else {
-                      console.log("  You must enter the last name of the new employee.")
-                      return false
-                  }
-              }
-          },
-          {
-              type: 'list',
-              name: 'roleSelect',
-              message: "Please select new employee's role.",
-              choices: roleArr
-          },
-      ])
-      .then(response => {
-          const mgrArr = [];
-          const roleResponse = response.roleSelect;
-          let roleId;
-          let mgrId;
-        
-          const sqlRole = `SELECT * FROM role;`
-  
-          // Query to find role id
-          db.query(sqlRole, (err, result) => {
-              if (err) throw err;
-  
-              // Loops through roles to find matching id
-              result.forEach((role) => {
-                  if (roleResponse === role.title) {
-                      roleId = role.id
-                  }
-              })
-  
-              // To get employee data to use for selection of employee's manager
-              sqlMgr = `SELECT * FROM employee;`;
-              db.query(sqlMgr, (err, mgrData) => {
-                  if (err) throw err;
-                  const mgr = mgrData.map(({ first_name, last_name }) => 
-                  ({ name: first_name + ' ' + last_name}));
-  
-                  // Mgr question
-                  return inquirer.prompt([
-                      {
-                          type: 'list',
-                          name: 'mgrSelect',
-                          message: "Please select new employee's manager.",
-                          choices: mgr
-                      }
-                  ])
-                  .then(mgrResult => {
-                      const mgrResponse = mgrResult.mgrSelect;
-                  
-                      // Gets the first and last name from the manager response to use to find the id
-                      firstName = mgrResponse.split(' ')[0];
-                      lastName = mgrResponse.split(' ').pop();
-                  
-  
-                      // Loops through employees to find ID based on the first name and last name
-                      mgrData.forEach((employee) => {
-                          if ((firstName === employee.first_name) && (lastName === employee.last_name)) {
-                              mgrId = employee.id;
-                          }
-                      })
-                  
-                      const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
-                                   VALUES (?,?,?,?)`;
-                      const params = [response.addFirstName, response.addLastName, roleId, mgrId];
-        
-                      // Query to add employee
-                      db.query(sql, params, (err, result) => {
-                          if (err) throw err;
-                          console.log("New employee added successfully!")
-                          initialPrompt();
-                      })
-                  })
-              })
-          })   
-      });
-  };
-  
+  const sqlR = `SELECT * FROM role;`;
+  const roleArr = [];
 
-  // Deletes an employee
+  // Gets all current roles and pushes to roleArr
+  db.query(sqlR, (err, roleData) => {
+      if (err) throw err;
+      roleData.forEach((role) => roleArr.push(role.title));
+  })
+
+    return inquirer.prompt([
+        {
+            type: 'input',
+            name: 'addFirstName',
+            message: "Please enter new employee's first name.",
+            validate: firstNameInput => {
+                if (firstNameInput) {
+                    if (firstNameInput.charAt(0) === firstNameInput.charAt(0).toUpperCase()) {
+                        return true;
+                    } else {
+                        console.log("  Please capitalize the first name.");
+                        return false
+                    }
+                } else {
+                    console.log("  You must enter the first name of the new employee.")
+                    return false
+                }
+            }
+        },
+        {
+            type: 'input',
+            name: 'addLastName',
+            message: "Please enter new employee's last name.",
+            validate: lastNameInput => {
+                if (lastNameInput) {
+                    if (lastNameInput.charAt(0) === lastNameInput.charAt(0).toUpperCase()) {
+                        return true;
+                    } else {
+                        console.log("  Please capitalize the last name.");
+                        return false
+                    }
+                } else {
+                    console.log("  You must enter the last name of the new employee.")
+                    return false
+                }
+            }
+        },
+        {
+            type: 'list',
+            name: 'roleSelect',
+            message: "Please select new employee's role.",
+            choices: roleArr
+        },
+    ])
+    .then(response => {
+        const mgrArr = [];
+        const roleResponse = response.roleSelect;
+        let roleId;
+        let mgrId;
+      
+        const sqlRole = `SELECT * FROM role;`
+
+        // Query to find role id
+        db.query(sqlRole, (err, result) => {
+            if (err) throw err;
+
+            // Loops through roles to find matching id
+            result.forEach((role) => {
+                if (roleResponse === role.title) {
+                    roleId = role.id
+                }
+            })
+
+            // To get employee data to use for selection of employee's manager
+            sqlMgr = `SELECT * FROM employee;`;
+            db.query(sqlMgr, (err, mgrData) => {
+                if (err) throw err;
+                const mgr = mgrData.map(({ first_name, last_name }) => 
+                ({ name: first_name + ' ' + last_name}));
+
+                // Mgr question
+                return inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'mgrSelect',
+                        message: "Please select new employee's manager.",
+                        choices: mgr
+                    }
+                ])
+                .then(mgrResult => {
+                    const mgrResponse = mgrResult.mgrSelect;
+                
+                    // Gets the first and last name from the manager response to use to find the id
+                    firstName = mgrResponse.split(' ')[0];
+                    lastName = mgrResponse.split(' ').pop();
+                
+
+                    // Loops through employees to find ID based on the first name and last name
+                    mgrData.forEach((employee) => {
+                        if ((firstName === employee.first_name) && (lastName === employee.last_name)) {
+                            mgrId = employee.id;
+                        }
+                    })
+                
+                    const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
+                                 VALUES (?,?,?,?)`;
+                    const params = [response.addFirstName, response.addLastName, roleId, mgrId];
+      
+                    // Query to add employee
+                    db.query(sql, params, (err, result) => {
+                        if (err) throw err;
+                        console.log("New employee added successfully!")
+                        initialPrompt();
+                    })
+                })
+            })
+        })   
+    });
+};
+
+// Deletes an employee
 const deleteEmployee = () => {
     const employeeArr = [];
     let employeeID;
@@ -511,7 +504,6 @@ const deleteDepartment = () => {
     });
 };
 
-
 // Adds new role
 const addRole = () => {
     const sql = `SELECT * FROM department;`
@@ -590,7 +582,6 @@ const addRole = () => {
         })
     });
 };
-
 
 // Deletes a role
 const deleteRole = () => {
