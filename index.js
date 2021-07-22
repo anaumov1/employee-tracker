@@ -472,3 +472,41 @@ const addDepartment = () => {
          })
     });
 };
+
+// Delete a department
+const deleteDepartment = () => {
+    const departmentArr = [];
+    let deptID;
+    let sqlDept = `SELECT * FROM department;`;
+
+    // Gets all current departments and pushes to deptArr
+    db.query(sqlDept, (err, deptData) => {
+        if (err) throw err;
+        deptData.forEach((department) => departmentArr.push(department.name));
+
+        return inquirer.prompt([
+            {
+                type: 'list',
+                name: 'deleteDept',
+                message: "Which department would you like to delete?", 
+                choices: departmentArr
+            },
+        ])
+        .then(response => {
+            // Loops through departments to find the matching ID
+            deptData.forEach((department) => {
+                if (response.deleteDept === department.name) {
+                    deptID = department.id;
+                }
+            })
+            
+            // Query to delete the department
+            const sql = `DELETE FROM department WHERE id = ?`;
+            db.query(sql, deptID, (err, result) => {
+                if (err) throw err;
+                console.log('Department deleted.')
+                initialPrompt();
+                }) 
+        });
+    });
+};
